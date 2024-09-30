@@ -1,0 +1,142 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Data/Glauber.NotificationSystem.Data.csproj": {}
+  },
+  "projects": {
+    "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Business/Glauber.NotificationSystem.Business.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Business/Glauber.NotificationSystem.Business.csproj",
+        "projectName": "Glauber.NotificationSystem.Business",
+        "projectPath": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Business/Glauber.NotificationSystem.Business.csproj",
+        "packagesPath": "/home/glcantacini/.nuget/packages/",
+        "outputPath": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Business/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/glcantacini/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "FluentResults": {
+              "target": "Package",
+              "version": "[3.16.0, )"
+            },
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[11.10.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.108/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Data/Glauber.NotificationSystem.Data.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Data/Glauber.NotificationSystem.Data.csproj",
+        "projectName": "Glauber.NotificationSystem.Data",
+        "projectPath": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Data/Glauber.NotificationSystem.Data.csproj",
+        "packagesPath": "/home/glcantacini/.nuget/packages/",
+        "outputPath": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Data/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/glcantacini/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Business/Glauber.NotificationSystem.Business.csproj": {
+                "projectPath": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Business/Glauber.NotificationSystem.Business.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Relational": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.108/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

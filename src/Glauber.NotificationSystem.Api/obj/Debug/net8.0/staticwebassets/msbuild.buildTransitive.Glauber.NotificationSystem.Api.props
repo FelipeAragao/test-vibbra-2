@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../buildMultiTargeting/Glauber.NotificationSystem.Api.props" />
+</Project>

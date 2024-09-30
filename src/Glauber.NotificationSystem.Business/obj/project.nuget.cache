@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "EbP5YWnskOyPxc/4IP7jVgyUTX7fh5HqhnFUoRa+zWRDT6jbsJxIxWNk98KAiEdHWGdpV10xcZKiaJFupiLSyw==",
+  "success": true,
+  "projectFilePath": "/home/glcantacini/Documents/Programming/Glauber-NotificationSystem/src/Glauber.NotificationSystem.Business/Glauber.NotificationSystem.Business.csproj",
+  "expectedPackageFiles": [
+    "/home/glcantacini/.nuget/packages/fluentresults/3.16.0/fluentresults.3.16.0.nupkg.sha512",
+    "/home/glcantacini/.nuget/packages/fluentvalidation/11.10.0/fluentvalidation.11.10.0.nupkg.sha512",
+    "/home/glcantacini/.nuget/packages/microsoft.extensions.logging.abstractions/2.1.1/microsoft.extensions.logging.abstractions.2.1.1.nupkg.sha512",
+    "/home/glcantacini/.nuget/packages/system.threading.tasks.extensions/4.5.4/system.threading.tasks.extensions.4.5.4.nupkg.sha512"
+  ],
+  "logs": []
+}
