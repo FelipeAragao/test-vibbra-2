@@ -1,16 +1,22 @@
 using FluentResults;
 using Glauber.NotificationSystem.Business.Entities.Base;
+using Glauber.NotificationSystem.Business.Interfaces.Repository;
 using Glauber.NotificationSystem.Business.Interfaces.Repository.NotificationRepository;
 using Glauber.NotificationSystem.Business.Interfaces.Service;
 
 namespace Glauber.NotificationSystem.Business.Services;
 
-public abstract class NotificationService<TNotification>(INotificationRepository<TNotification> notificationRepository) : BaseService<TNotification>, INotificationService<TNotification> where TNotification : BaseNotification
+public abstract class NotificationService<TNotification>(INotificationRepository<TNotification> notificationRepository, IAppRepository appRepository) : BaseService<TNotification>, INotificationService<TNotification> where TNotification : BaseNotification
 {
+    private readonly IAppRepository _appRepository = appRepository;
     private readonly INotificationRepository<TNotification> _notificationRepository = notificationRepository;
 
     public async Task<Result> CreateNotificationAsync(int appId, TNotification notification)
     {
+        if (await AppDoesNotExist(appId))
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         var validationResult = Validate(notification);
         if (!validationResult.IsValid)
         {
@@ -20,7 +26,7 @@ public abstract class NotificationService<TNotification>(INotificationRepository
         }
 
         notification.AppId = appId;
-        
+
         return Result.OkIf(
             isSuccess: await _notificationRepository.AddAsync(notification),
             error: "Failed to add new notification"
@@ -29,6 +35,10 @@ public abstract class NotificationService<TNotification>(INotificationRepository
 
     public async Task<Result<TNotification>> GetNotificationAsync(int appId, int notificationId)
     {
+        if (await AppDoesNotExist(appId))
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         var notification = await _notificationRepository.GetNotificationAsync(appId, notificationId);
         if (notification.AppId != appId)
         {
@@ -36,7 +46,7 @@ public abstract class NotificationService<TNotification>(INotificationRepository
         }
         else if (notification.Id != notificationId)
         {
-            return Result.Fail("There is no notification with the provided ID.");            
+            return Result.Fail("There is no notification with the provided ID.");
         }
 
         return Result.Ok(notification);
@@ -44,6 +54,10 @@ public abstract class NotificationService<TNotification>(INotificationRepository
 
     public async Task<Result<IEnumerable<TNotification>>> GetNotificationsByDateAsync(int appId, DateTime initDate, DateTime endDate)
     {
+        if (await AppDoesNotExist(appId))
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         var notifications = await _notificationRepository.GetNotificationsByDateAsync(appId, initDate, endDate);
         if (!notifications.Any())
         {
@@ -54,4 +68,9 @@ public abstract class NotificationService<TNotification>(INotificationRepository
     }
 
     public void Dispose() => _notificationRepository.Dispose();
+
+    protected async Task<bool> AppDoesNotExist(int appId)
+    {
+        return await _appRepository.GetAppWithActiveChannelsAsync(appId) == null;
+    }
 }

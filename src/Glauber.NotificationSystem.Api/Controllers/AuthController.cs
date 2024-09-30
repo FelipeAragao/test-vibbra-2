@@ -36,18 +36,7 @@ namespace Glauber.NotificationSystem.Api.Controllers
            
             if (result.Succeeded)
             {
-                var user = await _userManager.FindByEmailAsync(loginUser.Login);
-
-                return Ok(new
-                {
-                    token = GenerateToken(loginUser.Login),
-                    user = new
-                    {
-                        user!.Id,
-                        user!.Name,
-                        user!.Email
-                    }
-                });
+                return Ok(await GenerateToken(loginUser.Login));
             }
 
             if (result.IsLockedOut)
@@ -85,18 +74,29 @@ namespace Glauber.NotificationSystem.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet("users/{id:int}")]
-        public async Task<IActionResult> GetUser(int id)
+        [HttpGet("users/{id:guid}")]
+        public async Task<IActionResult> GetUser(Guid id)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
-            return Ok(user);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            
+            return Ok(new
+            {
+                user.Email,
+                user.Name,
+                user.CompanyName,
+                user.PhoneNumber,
+                user.CompanyAddress
+            });
         }
 
         private async Task<LoginResponseDTO> GenerateToken(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             var claims = await _userManager.GetClaimsAsync(user);
-            var userRoles = await _userManager.GetRolesAsync(user);
 
             claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
             claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
@@ -122,13 +122,13 @@ namespace Glauber.NotificationSystem.Api.Controllers
 
             var response = new LoginResponseDTO
             {
-                AccessToken = encodedToken,
+                Token = encodedToken,
                 ExpiresIn = TimeSpan.FromHours(_appSettings.HoursToExpire).TotalSeconds,
-                UserToken = new UserTokenDTO
+                User = new UserTokenDTO
                 {
                     Id = user.Id,
-                    Email = user.Email,
-                    Claims = claims.Select(c=> new ClaimDTO{ Type = c.Type, Value = c.Value})
+                    Name = user.Name,
+                    Email = user.Email
                 }
             };
 

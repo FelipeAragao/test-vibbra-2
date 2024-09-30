@@ -26,13 +26,16 @@ namespace Glauber.NotificationSystem.Api.Controllers
         [HttpGet("settings")]
         public async Task<ActionResult> GetSettings(int appId)
         {
-            var result = await _webpushSettingsService.GetChannelSettingsByAppAsync(appId);
-            if (result.Value == null)
+            var operationResult = await _webpushSettingsService.GetChannelSettingsByAppAsync(appId);
+            if (operationResult.IsFailed)
+            {
+                return FormatResponse(operationResult.ToResult());
+            }
+            if (operationResult.Value == null)
             {
                 return NotFound();
-
             }
-            return Ok(new SettingsResponse(_mapper.Map<WebPushSettingsDTO>(result.Value)));
+            return Ok(new SettingsResponse(_mapper.Map<WebPushSettingsDTO>(operationResult.Value)));
         }
 
         //[ClaimsAuthorize("Settings", "Add")]
@@ -40,7 +43,11 @@ namespace Glauber.NotificationSystem.Api.Controllers
         public async Task<ActionResult<WebPushSettingsDTO>> AddSettings([FromRoute]int appId, [FromBody] WebPushSettingsDTO webpushSettingsDTO)
         {
             var webpushSettings = _mapper.Map<WebPushSettings>(webpushSettingsDTO);
-            await _webpushSettingsService.AddChannelSettingsAsync(appId, webpushSettings);
+            var operationResult = await _webpushSettingsService.AddChannelSettingsAsync(appId, webpushSettings);
+            if (operationResult.IsFailed)
+            {
+                return FormatResponse(operationResult);
+            }
 
             return CreatedAtAction(nameof(GetSettings), new { appId = webpushSettings.AppId }, webpushSettings);
         }
@@ -49,7 +56,11 @@ namespace Glauber.NotificationSystem.Api.Controllers
         [HttpPut("settings")]
         public async Task<ActionResult> ToggleChannel(int appId)
         {
-            await _webpushSettingsService.ToggleChannelStatusAsync(appId);
+            var operationResult = await _webpushSettingsService.ToggleChannelStatusAsync(appId);
+            if (operationResult.IsFailed)
+            {
+                return FormatResponse(operationResult);
+            }
             var result = await _webpushSettingsService.GetChannelStatusAsync(appId);
             return Ok(new ChannelStatus(
                 Convert.ToInt32(!result.Value),

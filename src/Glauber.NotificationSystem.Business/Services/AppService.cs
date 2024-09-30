@@ -29,20 +29,12 @@ public class AppService(IAppRepository appRepository) : BaseService<App>, IAppSe
     public async Task<Result<IEnumerable<App>>> GetAppsAsync()
     {
         var apps = await _appRepository.GetAllAsync();
-        if (!apps.Any())
-        {
-            return Result.Fail("There is no registered app!");
-        }
         return Result.Ok(apps);
     }
 
     public async Task<Result<App>> GetAppAsync(int appId)
     {
         var app = await _appRepository.GetAppWithActiveChannelsAsync(appId);
-        if (app.Id != appId)
-        {
-            return Result.Fail("There is no app with the corresponding ID");
-        }
         return Result.Ok(app);
     }
 

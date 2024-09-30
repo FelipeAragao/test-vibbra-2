@@ -49,7 +49,11 @@ namespace Glauber.NotificationSystem.Api.Controllers
         [HttpPut("settings")]
         public async Task<ActionResult> ToggleChannel(int appId)
         {
-            await _smsSettingsService.ToggleChannelStatusAsync(appId);
+            var operationResult = await _smsSettingsService.ToggleChannelStatusAsync(appId);
+            if (operationResult.IsFailed)
+            {
+                return FormatResponse(operationResult);
+            }
             var result = await _smsSettingsService.GetChannelStatusAsync(appId);
             return Ok(new ChannelStatus(
                 Convert.ToInt32(!result.Value),

@@ -15,12 +15,20 @@ public class WebPushSettingsService(IWebpushSettingsRepository settingsRepositor
     public override async Task<Result<bool>> GetChannelStatusAsync(int appId)
     {
         var app = await _appRepository.GetAppWithActiveChannelsAsync(appId);
+        if (app == null)
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         return Result.Ok(app.ActiveChannels.WebPush);
     }
     
     public override async Task<Result> ToggleChannelStatusAsync(int appId)
     {
         var app = await _appRepository.GetAppWithActiveChannelsAsync(appId);
+        if (app == null)
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         app.ActiveChannels.WebPush = !app.ActiveChannels.WebPush;
         return Result.OkIf(
             isSuccess: await _appRepository.UpdateAsync(app), 

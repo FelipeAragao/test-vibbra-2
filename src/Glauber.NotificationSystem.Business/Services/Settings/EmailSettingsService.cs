@@ -15,12 +15,20 @@ public class EmailSettingsService(IEmailSettingsRepository settingsRepository, I
     public override async Task<Result<bool>> GetChannelStatusAsync(int appId)
     {
         var app = await _appRepository.GetAppWithActiveChannelsAsync(appId);
+        if (app == null)
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         return Result.Ok(app.ActiveChannels.Email);
     }
 
     public override async Task<Result> ToggleChannelStatusAsync(int appId)
     {
         var app = await _appRepository.GetAppWithActiveChannelsAsync(appId);
+        if (app == null)
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         app.ActiveChannels.Email = !app.ActiveChannels.Email;
         return Result.OkIf(
             isSuccess: await _appRepository.UpdateAsync(app), 

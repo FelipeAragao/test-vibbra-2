@@ -13,6 +13,10 @@ public abstract class SettingsService<TSettings>(ISettingsRepository<TSettings> 
 
     public async Task<Result> AddChannelSettingsAsync(int appId, TSettings settings)
     {
+        if (await AppDoesNotExist(appId))
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         var validationResult = Validate(settings);
         if (!validationResult.IsValid)
         {
@@ -22,6 +26,15 @@ public abstract class SettingsService<TSettings>(ISettingsRepository<TSettings> 
         }
 
         settings.AppId = appId;
+        var currentSettings = await _settingsRepository.GetChannelSettingsByAppAsync(appId);
+
+        if (currentSettings != null)
+        {
+            currentSettings = settings;
+            return Result.OkIf(
+                isSuccess: await _settingsRepository.UpdateAsync(currentSettings),
+                error: "Failed to change settings");
+        }
 
         return Result.OkIf(
             isSuccess: await _settingsRepository.AddAsync(settings),
@@ -31,6 +44,10 @@ public abstract class SettingsService<TSettings>(ISettingsRepository<TSettings> 
 
     public virtual async Task<Result<TSettings>> GetChannelSettingsByAppAsync(int appId)
     {
+        if (await AppDoesNotExist(appId))
+        {
+            return Result.Fail("No app was found with the provided Id");
+        }
         var channelSettings = await _settingsRepository.GetChannelSettingsByAppAsync(appId);
         return Result.Ok(channelSettings);
     }
@@ -40,4 +57,9 @@ public abstract class SettingsService<TSettings>(ISettingsRepository<TSettings> 
     public abstract Task<Result> ToggleChannelStatusAsync(int appId);
 
     public abstract Task<Result<bool>> GetChannelStatusAsync(int appId);
+
+    protected async Task<bool> AppDoesNotExist(int appId)
+    {
+        return await _appRepository.GetAppWithActiveChannelsAsync(appId) == null;
+    }
 }

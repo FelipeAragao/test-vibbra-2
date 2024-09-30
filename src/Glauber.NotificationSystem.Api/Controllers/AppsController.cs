@@ -20,6 +20,10 @@ namespace Glauber.NotificationSystem.Api.Controllers
         public async Task<ActionResult> GetApps()
         {
             var apps = await _appService.GetAppsAsync();
+            if (!apps.Value.Any())
+            {
+                return NotFound();
+            }
             return Ok(apps.Value.Select(a => new CreatedApp(a.Id, a.AppToken)));
         }
 
@@ -28,7 +32,7 @@ namespace Glauber.NotificationSystem.Api.Controllers
         {
             var app = await _appService.GetAppAsync(id);
 
-            if (app == null)
+            if (app.Value == null)
             {
                 return NotFound();
             }
@@ -37,7 +41,7 @@ namespace Glauber.NotificationSystem.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<AppResponseDTO>> PostApp(AppDTO appDTO)
+        public async Task<ActionResult<AppResponseDTO>> AddApp(AppDTO appDTO)
         {
             var app = _mapper.Map<App>(appDTO);
             var result = await _appService.AddAppAsync(app);
