@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Glauber.NotificationSystem.Api.Controllers
 {
-    [Route("api/apps")]
+    [Route("apps")]
     [ApiController]
     [Authorize]
     public class AppsController(IAppService appService, IMapper mapper) : MainController

@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pag
 
 namespace Glauber.NotificationSystem.Api.Controllers
 {
-    [Route("api")]
+    [Route("")]
     [ApiController]
     public class AuthController(
         SignInManager<AppUser> signInManager, 
@@ -24,7 +24,7 @@ namespace Glauber.NotificationSystem.Api.Controllers
         private readonly UserManager<AppUser> _userManager = userManager;
         private AppSettings _appSettings = appSettings.Value;
 
-        [HttpPost]
+        [HttpPost("login")]
         public async Task<IActionResult> Login(LoginUserDTO loginUser)
         {
             if (!ModelState.IsValid) return Ok(false);

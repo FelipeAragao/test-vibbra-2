@@ -17,6 +17,8 @@ public static class DependencyInjectionConfig
     public static IServiceCollection ResolveDependencies(this IServiceCollection services)
     {
         services.AddScoped<NotificationSystemDbContext>();
+
+        services.AddScoped<IAppRepository, AppRepository>();
         
         services.AddScoped<IWebpushSettingsRepository, WebPushSettingsRepository>();
         services.AddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
@@ -25,8 +27,6 @@ public static class DependencyInjectionConfig
         services.AddScoped<IWebpushNotificationRepository, WebPushNotificationRepository>();
         services.AddScoped<IEmailNotificationRepository, EmailNotificationRepository>();
         services.AddScoped<ISMSNotificationRepository, SMSNotificationRepository>();
-
-        services.AddScoped<IAppRepository, AppRepository>();
 
         services.AddScoped<IWebpushSettingsRepository, WebPushSettingsRepository>();
         services.AddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
