@@ -7,7 +7,7 @@ using Glauber.NotificationSystem.Business.Interfaces.Service.NotificationService
 
 namespace Glauber.NotificationSystem.Business.Services.Notification;
 
-public class EmailNotificationService(INotificationRepository<EmailNotification> notificationRepository, IAppRepository appRepository) : NotificationService<EmailNotification>(notificationRepository, appRepository), IEmailNotificationService
+public class EmailNotificationService(IEmailNotificationRepository notificationRepository, IAppRepository appRepository) : NotificationService<EmailNotification>(notificationRepository, appRepository), IEmailNotificationService
 {
     public override AbstractValidator<EmailNotification> Validator => new EmailNotificationValidator();
 }

@@ -7,7 +7,7 @@ using Glauber.NotificationSystem.Business.Interfaces.Service.NotificationService
 
 namespace Glauber.NotificationSystem.Business.Services.Notification;
 
-public class WebPushNotificationService(INotificationRepository<WebPushNotification> notificationRepository, IAppRepository appRepository) : NotificationService<WebPushNotification>(notificationRepository, appRepository), IWebPushNotificationService
+public class WebPushNotificationService(IWebpushNotificationRepository notificationRepository, IAppRepository appRepository) : NotificationService<WebPushNotification>(notificationRepository, appRepository), IWebPushNotificationService
 {
     public override AbstractValidator<WebPushNotification> Validator => new WebpushNotificationValidator();  
 }

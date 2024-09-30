@@ -7,7 +7,7 @@ using Glauber.NotificationSystem.Business.Interfaces.Service.NotificationService
 
 namespace Glauber.NotificationSystem.Business.Services.Notification;
 
-public class SMSNotificationService(INotificationRepository<SMSNotification> notificationRepository, IAppRepository appRepository) : NotificationService<SMSNotification>(notificationRepository, appRepository), ISMSNotificationService
+public class SMSNotificationService(ISMSNotificationRepository notificationRepository, IAppRepository appRepository) : NotificationService<SMSNotification>(notificationRepository, appRepository), ISMSNotificationService
 {
     public override AbstractValidator<SMSNotification> Validator => new SMSNotificationValidator();
 }
