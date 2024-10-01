@@ -9,7 +9,7 @@ public class WebPushSettingsRepository(NotificationSystemDbContext context) : Se
 {
     public override async Task<WebPushSettings> GetChannelSettingsByAppAsync(int appId)
     {
-        return await DbSet
+        return await DbSet.AsNoTracking()
             .Include(w => w.Site)
             .Include(w => w.AllowNotification)
             .Include(w => w.WelcomeNotification)

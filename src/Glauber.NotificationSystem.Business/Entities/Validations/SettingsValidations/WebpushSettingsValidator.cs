@@ -47,8 +47,7 @@ public partial class WebpushSettingsValidator : AbstractValidator<WebPushSetting
             welcomeNotification.RuleFor(ww => ww.MessageTitle)
             .NotEmpty().WithMessage("Please provide a valid message text for the WelcomeNotification settings");
 
-            welcomeNotification.RuleFor(ww => ww.EnableUrlRedirect)   
-            .NotEmpty().WithMessage("Please provide a value for url redirection")
+            welcomeNotification.RuleFor(ww => ww.EnableUrlRedirect)
             .Must(BeValidUrlRedirect).WithMessage("Please provide either 0 or 1 value for url redirect");
 
             When(ww => !string.IsNullOrWhiteSpace(ww.WelcomeNotification.UrlRedirect), () =>

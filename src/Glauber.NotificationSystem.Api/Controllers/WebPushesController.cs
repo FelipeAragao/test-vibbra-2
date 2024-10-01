@@ -22,44 +22,37 @@ public class WebPushesController(IAppService appService, IWebPushSettingsService
     private readonly IWebPushNotificationService _webpushNotificationService = webpushNotificationService;
     private readonly IMapper _mapper = mapper;
 
-    //[ClaimsAuthorize("Settings", "Get")]
     [HttpGet("settings")]
     public async Task<ActionResult> GetSettings(int appId)
     {
         var operationResult = await _webpushSettingsService.GetChannelSettingsByAppAsync(appId);
         if (operationResult.IsFailed)
         {
-            return FormatResponse(operationResult.ToResult());
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        if (operationResult.Value == null)
-        {
-            return NotFound();
-        }
-        return Ok(new SettingsResponse(_mapper.Map<WebPushSettingsDTO>(operationResult.Value)));
+        return Ok(new SettingsWebPushResponse(_mapper.Map<WebPushSettingsDTO>(operationResult.Value)));
     }
 
-    //[ClaimsAuthorize("Settings", "Add")]
     [HttpPost("settings")]
-    public async Task<ActionResult<WebPushSettingsDTO>> AddSettings([FromRoute]int appId, [FromBody] WebPushSettingsDTO webpushSettingsDTO)
+    public async Task<ActionResult<WebPushSettingsDTO>> AddSettings([FromRoute]int appId, [FromBody] WebPushSettingsDTO WebPushSettingsDTO)
     {
-        var webpushSettings = _mapper.Map<WebPushSettings>(webpushSettingsDTO);
-        var operationResult = await _webpushSettingsService.AddChannelSettingsAsync(appId, webpushSettings);
+        var smsSettings = _mapper.Map<WebPushSettings>(WebPushSettingsDTO);
+        var operationResult = await _webpushSettingsService.AddChannelSettingsAsync(appId, smsSettings);
         if (operationResult.IsFailed)
         {
-            return FormatResponse(operationResult);
+            return FormatBadRequestResponse(operationResult.Errors);
         }
 
-        return CreatedAtAction(nameof(GetSettings), new { appId = webpushSettings.AppId }, webpushSettings);
+        return CreatedAtAction(nameof(GetSettings), new { appId = smsSettings.AppId }, WebPushSettingsDTO);
     }
 
-    //[ClaimsAuthorize("Settings", "Toggle")]
     [HttpPut("settings")]
     public async Task<ActionResult> ToggleChannel(int appId)
     {
         var operationResult = await _webpushSettingsService.ToggleChannelStatusAsync(appId);
         if (operationResult.IsFailed)
         {
-            return FormatResponse(operationResult);
+            return FormatBadRequestResponse(operationResult.Errors);
         }
         var result = await _webpushSettingsService.GetChannelStatusAsync(appId);
         return Ok(new ChannelStatus(
@@ -68,49 +61,39 @@ public class WebPushesController(IAppService appService, IWebPushSettingsService
         ));
     }
 
-    //[ClaimsAuthorize("Notification", "GetHistory")]
     [HttpGet("notifications")]
     public async Task<ActionResult> GetNotifications([FromRoute]int appId, [FromQuery]DateTime initDate, [FromQuery]DateTime endDate)
-    {
-        if (!await IsChannelActive(appId))
+    {        
+        var operationResult = await _webpushNotificationService.GetNotificationsByDateAsync(appId, initDate, endDate);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        
-        var notifications = await _webpushNotificationService.GetNotificationsByDateAsync(appId, initDate, endDate);
-        return Ok(notifications.Value.Select(n => new NotificationHistory(n.Id, n.SendDate)));
+        return Ok(operationResult.Value.Select(n => new NotificationHistory(n.Id, n.SendDate)));
     }
 
-    //[ClaimsAuthorize("Notification", "GetDetails")]
     [HttpGet("notifications/{notificationId:int}")]
     public async Task<ActionResult<WebPushNotificationDetailDTO>> GetNotification(int appId, int notificationId)
     {
-        if (!await IsChannelActive(appId))
+        var operationResult = await _webpushNotificationService.GetNotificationAsync(appId, notificationId);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        var notification = await _webpushNotificationService.GetNotificationAsync(appId, notificationId);
-        return Ok(_mapper.Map<WebPushNotificationDetailDTO>(notification.Value));
+        return Ok(_mapper.Map<WebPushNotificationDetailDTO>(operationResult.Value));
     }
 
-    //[ClaimsAuthorize("Notification", "Create")]
     [HttpPost("notifications")]
     public async Task<ActionResult> CreateNotification([FromRoute]int appId, [FromBody] WebPushNotificationDTO notificationDTO)
     {
-        if (!await IsChannelActive(appId))
+        var notification = _mapper.Map<WebPushNotification>(notificationDTO);
+        
+        var operationResult = await _webpushNotificationService.CreateNotificationAsync(appId, notification);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
 
-        var notification = _mapper.Map<WebPushNotification>(notificationDTO);
-
-        await _webpushNotificationService.CreateNotificationAsync(appId, notification);
         return CreatedAtAction(nameof(GetNotification), new { appId, notificationId = notification.Id }, new CreatedNotification(notification.Id));
-    }
-
-    private async Task<bool> IsChannelActive(int appId)
-    {
-        var result = await _webpushSettingsService.GetChannelStatusAsync(appId);
-        return result.Value;
     }
 }

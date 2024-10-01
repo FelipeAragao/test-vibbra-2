@@ -10,4 +10,9 @@ namespace Glauber.NotificationSystem.Business.Services.Notification;
 public class SMSNotificationService(ISMSNotificationRepository notificationRepository, IAppRepository appRepository) : NotificationService<SMSNotification>(notificationRepository, appRepository), ISMSNotificationService
 {
     public override AbstractValidator<SMSNotification> Validator => new SMSNotificationValidator();
+
+    protected override bool IsChannelActive()
+    {
+        return App.ActiveChannels.SMS;
+    }
 }

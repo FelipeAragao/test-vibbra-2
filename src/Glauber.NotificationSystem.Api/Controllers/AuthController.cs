@@ -70,7 +70,7 @@ namespace Glauber.NotificationSystem.Api.Controllers
                     createdUser!.Id
                 });
             }
-            return FormatErrorResponse(result.Errors);
+            return FormatBadRequestResponse(result.Errors);
         }
 
         [Authorize]

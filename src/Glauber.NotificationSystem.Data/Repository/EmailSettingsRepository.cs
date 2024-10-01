@@ -9,7 +9,7 @@ public class EmailSettingsRepository(NotificationSystemDbContext context) : Sett
 {
     public override async Task<EmailSettings> GetChannelSettingsByAppAsync(int appId)
     {
-        return await DbSet
+        return await DbSet.AsNoTracking()
             .Include(e => e.Sender)
             .Include(e => e.Server)
             .Include(e => e.EmailTemplates)

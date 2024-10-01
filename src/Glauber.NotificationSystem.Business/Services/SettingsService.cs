@@ -49,6 +49,10 @@ public abstract class SettingsService<TSettings>(ISettingsRepository<TSettings> 
             return Result.Fail("No app was found with the provided Id");
         }
         var channelSettings = await _settingsRepository.GetChannelSettingsByAppAsync(appId);
+        if (channelSettings == null)
+        {
+            return Result.Fail("There are no settings for the provided app");
+        }
         return Result.Ok(channelSettings);
     }
 

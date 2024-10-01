@@ -1,4 +1,5 @@
 using FluentResults;
+using Glauber.NotificationSystem.Business.Entities;
 using Glauber.NotificationSystem.Business.Entities.Base;
 using Glauber.NotificationSystem.Business.Interfaces.Repository;
 using Glauber.NotificationSystem.Business.Interfaces.Repository.NotificationRepository;
@@ -11,12 +12,20 @@ public abstract class NotificationService<TNotification>(INotificationRepository
     private readonly IAppRepository _appRepository = appRepository;
     private readonly INotificationRepository<TNotification> _notificationRepository = notificationRepository;
 
+    public App App { get; set; }
+
     public async Task<Result> CreateNotificationAsync(int appId, TNotification notification)
     {
         if (await AppDoesNotExist(appId))
         {
             return Result.Fail("No app was found with the provided Id");
         }
+
+        if (IsChannelActive())
+        {
+            return Result.Fail("Channel is not active");
+        }
+        
         var validationResult = Validate(notification);
         if (!validationResult.IsValid)
         {
@@ -39,8 +48,14 @@ public abstract class NotificationService<TNotification>(INotificationRepository
         {
             return Result.Fail("No app was found with the provided Id");
         }
+
+        if (IsChannelActive())
+        {
+            return Result.Fail("Channel is not active");
+        }
+
         var notification = await _notificationRepository.GetNotificationAsync(appId, notificationId);
-        if (notification.AppId != appId)
+        if (notification == null)
         {
             return Result.Fail("There is no notification for the informed app.");
         }
@@ -58,6 +73,12 @@ public abstract class NotificationService<TNotification>(INotificationRepository
         {
             return Result.Fail("No app was found with the provided Id");
         }
+
+        if (IsChannelActive())
+        {
+            return Result.Fail("Channel is not active");
+        }
+
         var notifications = await _notificationRepository.GetNotificationsByDateAsync(appId, initDate, endDate);
         if (!notifications.Any())
         {
@@ -69,8 +90,11 @@ public abstract class NotificationService<TNotification>(INotificationRepository
 
     public void Dispose() => _notificationRepository.Dispose();
 
+    protected abstract bool IsChannelActive();
+
     protected async Task<bool> AppDoesNotExist(int appId)
     {
-        return await _appRepository.GetAppWithActiveChannelsAsync(appId) == null;
+        App = await _appRepository.GetAppWithActiveChannelsAsync(appId);
+        return App == null;
     }
 }

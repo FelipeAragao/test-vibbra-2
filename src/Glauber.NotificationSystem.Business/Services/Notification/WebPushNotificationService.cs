@@ -9,5 +9,10 @@ namespace Glauber.NotificationSystem.Business.Services.Notification;
 
 public class WebPushNotificationService(IWebpushNotificationRepository notificationRepository, IAppRepository appRepository) : NotificationService<WebPushNotification>(notificationRepository, appRepository), IWebPushNotificationService
 {
-    public override AbstractValidator<WebPushNotification> Validator => new WebpushNotificationValidator();  
+    public override AbstractValidator<WebPushNotification> Validator => new WebpushNotificationValidator();
+
+    protected override bool IsChannelActive()
+    {
+        return App.ActiveChannels.WebPush;
+    }
 }

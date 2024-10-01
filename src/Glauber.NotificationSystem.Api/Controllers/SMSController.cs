@@ -22,37 +22,37 @@ public class SMSController(IAppService appService, ISMSSettingsService smsSettin
     private readonly ISMSNotificationService _smsNotificationService = smsNotificationService;
     private readonly IMapper _mapper = mapper;
 
-    //[ClaimsAuthorize("Settings", "Get")]
     [HttpGet("settings")]
     public async Task<ActionResult> GetSettings(int appId)
     {
-        var result = await _smsSettingsService.GetChannelSettingsByAppAsync(appId);
-        if (result.Value == null)
+        var operationResult = await _smsSettingsService.GetChannelSettingsByAppAsync(appId);
+        if (operationResult.IsFailed)
         {
-            return NotFound();
-
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        return Ok(new SettingsResponse(_mapper.Map<SMSSettingsDTO>(result.Value)));
+        return Ok(new SettingsSMSResponse(_mapper.Map<SMSSettingsDTO>(operationResult.Value)));
     }
 
-    //[ClaimsAuthorize("Settings", "Add")]
     [HttpPost("settings")]
-    public async Task<ActionResult<SMSSettingsDTO>> AddSettings([FromRoute]int appId, [FromBody] SMSSettingsDTO smsSettingsDTO)
+    public async Task<ActionResult<SMSSettingsDTO>> AddSettings([FromRoute]int appId, [FromBody] SMSSettingsDTO SMSSettingsDTO)
     {
-        var smsSettings = _mapper.Map<SMSSettings>(smsSettingsDTO);
-        await _smsSettingsService.AddChannelSettingsAsync(appId, smsSettings);
+        var smsSettings = _mapper.Map<SMSSettings>(SMSSettingsDTO);
+        var operationResult = await _smsSettingsService.AddChannelSettingsAsync(appId, smsSettings);
+        if (operationResult.IsFailed)
+        {
+            return FormatBadRequestResponse(operationResult.Errors);
+        }
 
-        return CreatedAtAction(nameof(GetSettings), new { appId = smsSettings.AppId }, smsSettings);
+        return CreatedAtAction(nameof(GetSettings), new { appId = smsSettings.AppId }, SMSSettingsDTO);
     }
 
-    //[ClaimsAuthorize("Settings", "Toggle")]
     [HttpPut("settings")]
     public async Task<ActionResult> ToggleChannel(int appId)
     {
         var operationResult = await _smsSettingsService.ToggleChannelStatusAsync(appId);
         if (operationResult.IsFailed)
         {
-            return FormatResponse(operationResult);
+            return FormatBadRequestResponse(operationResult.Errors);
         }
         var result = await _smsSettingsService.GetChannelStatusAsync(appId);
         return Ok(new ChannelStatus(
@@ -61,49 +61,39 @@ public class SMSController(IAppService appService, ISMSSettingsService smsSettin
         ));
     }
 
-    //[ClaimsAuthorize("Notification", "GetHistory")]
     [HttpGet("notifications")]
     public async Task<ActionResult> GetNotifications([FromRoute]int appId, [FromQuery]DateTime initDate, [FromQuery]DateTime endDate)
-    {
-        if (!await IsChannelActive(appId))
+    {        
+        var operationResult = await _smsNotificationService.GetNotificationsByDateAsync(appId, initDate, endDate);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        
-        var notifications = await _smsNotificationService.GetNotificationsByDateAsync(appId, initDate, endDate);
-        return Ok(notifications.Value.Select(n => new NotificationHistory(n.Id, n.SendDate)));
+        return Ok(operationResult.Value.Select(n => new NotificationHistory(n.Id, n.SendDate)));
     }
 
-    //[ClaimsAuthorize("Notification", "GetDetails")]
     [HttpGet("notifications/{notificationId:int}")]
     public async Task<ActionResult<SMSNotificationDetailDTO>> GetNotification(int appId, int notificationId)
     {
-        if (!await IsChannelActive(appId))
+        var operationResult = await _smsNotificationService.GetNotificationAsync(appId, notificationId);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        var notification = await _smsNotificationService.GetNotificationAsync(appId, notificationId);
-        return Ok(_mapper.Map<SMSNotificationDetailDTO>(notification.Value));
+        return Ok(_mapper.Map<SMSNotificationDetailDTO>(operationResult.Value));
     }
 
-    //[ClaimsAuthorize("Notification", "Create")]
     [HttpPost("notifications")]
     public async Task<ActionResult> CreateNotification([FromRoute]int appId, [FromBody] SMSNotificationDTO notificationDTO)
     {
-        if (!await IsChannelActive(appId))
+        var notification = _mapper.Map<SMSNotification>(notificationDTO);
+        
+        var operationResult = await _smsNotificationService.CreateNotificationAsync(appId, notification);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
 
-        var notification = _mapper.Map<SMSNotification>(notificationDTO);
-
-        await _smsNotificationService.CreateNotificationAsync(appId, notification);
         return CreatedAtAction(nameof(GetNotification), new { appId, notificationId = notification.Id }, new CreatedNotification(notification.Id));
-    }
-
-    private async Task<bool> IsChannelActive(int appId)
-    {
-        var result = await _smsSettingsService.GetChannelStatusAsync(appId);
-        return result.Value;
     }
 }

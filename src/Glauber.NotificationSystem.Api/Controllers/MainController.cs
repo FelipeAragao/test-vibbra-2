@@ -7,23 +7,35 @@ namespace Glauber.NotificationSystem.Api.Controllers;
 
 public abstract class MainController() : ControllerBase
 {
-    protected ActionResult FormatResponse(Result result)
+    protected ActionResult FormatBadRequestResponse(IEnumerable<IError> errors)
     {
-        if (result.IsFailed)
+        var sb = new StringBuilder();
+        foreach (var error in errors)
         {
-            var sb = new StringBuilder();
-            result.Errors.ForEach(error => sb.AppendLine(error.Message));
-            
-            return BadRequest(new
-            {
-                error = sb.ToString()
-            });
+            sb.AppendLine(error.Message);
         }
-
-        return Ok(result);
+        
+        return BadRequest(new
+        {
+            error = sb.ToString()
+        });
     }
 
-    protected ActionResult FormatErrorResponse(IEnumerable<IdentityError> errors)
+    protected ActionResult FormatNotFoundResponse(IEnumerable<IError> errors)
+    {
+        var sb = new StringBuilder();
+        foreach (var error in errors)
+        {
+            sb.AppendLine(error.Message);
+        }
+        
+        return NotFound(new
+        {
+            error = sb.ToString()
+        });
+    }
+
+    protected ActionResult FormatBadRequestResponse(IEnumerable<IdentityError> errors)
     {
         var sb = new StringBuilder();
         foreach (var error in errors)

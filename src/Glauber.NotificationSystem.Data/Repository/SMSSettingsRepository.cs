@@ -9,7 +9,7 @@ public class SMSSettingsRepository(NotificationSystemDbContext context) : Settin
 {
     public override async Task<SMSSettings> GetChannelSettingsByAppAsync(int appId)
     {
-        return await DbSet
+        return await DbSet.AsNoTracking()
             .Include(s => s.SMSProvider)
             .SingleOrDefaultAsync(s => s.AppId == appId);
     }

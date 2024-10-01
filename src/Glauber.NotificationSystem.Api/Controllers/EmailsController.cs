@@ -1,5 +1,4 @@
 using AutoMapper;
-using FluentResults;
 using Glauber.NotificationSystem.Api.DTOs;
 using Glauber.NotificationSystem.Api.DTOs.Email;
 using Glauber.NotificationSystem.Api.Responses;
@@ -22,37 +21,38 @@ public class EmailsController(IAppService appService, IEmailSettingsService emai
     private readonly IEmailNotificationService _emailNotificationService = emailNotificationService;
     private readonly IMapper _mapper = mapper;
 
-    //[ClaimsAuthorize("Settings", "Get")]
     [HttpGet("settings")]
     public async Task<ActionResult> GetSettings(int appId)
     {
-        var result = await _emailSettingsService.GetChannelSettingsByAppAsync(appId);
-        if (result.Value == null)
+        var operationResult = await _emailSettingsService.GetChannelSettingsByAppAsync(appId);
+        if (operationResult.IsFailed)
         {
-            return NotFound();
-
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        return Ok(new SettingsResponse(_mapper.Map<EmailSettingsDTO>(result.Value)));
+        
+        return Ok(new SettingsEmailResponse(_mapper.Map<EmailSettingsDTO>(operationResult.Value)));
     }
 
-    //[ClaimsAuthorize("Settings", "Add")]
     [HttpPost("settings")]
     public async Task<ActionResult<EmailSettingsDTO>> AddSettings([FromRoute]int appId, [FromBody] EmailSettingsDTO emailSettingsDTO)
     {
         var emailSettings = _mapper.Map<EmailSettings>(emailSettingsDTO);
-        await _emailSettingsService.AddChannelSettingsAsync(appId, emailSettings);
+        var operationResult = await _emailSettingsService.AddChannelSettingsAsync(appId, emailSettings);
+        if (operationResult.IsFailed)
+        {
+            return FormatBadRequestResponse(operationResult.Errors);
+        }
 
-        return CreatedAtAction(nameof(GetSettings), new { appId = emailSettings.AppId }, emailSettings);
+        return CreatedAtAction(nameof(GetSettings), new { appId = emailSettings.AppId }, emailSettingsDTO);
     }
 
-    //[ClaimsAuthorize("Settings", "Toggle")]
     [HttpPut("settings")]
     public async Task<ActionResult> ToggleChannel(int appId)
     {
         var operationResult = await _emailSettingsService.ToggleChannelStatusAsync(appId);
         if (operationResult.IsFailed)
         {
-            return FormatResponse(operationResult);
+            return FormatBadRequestResponse(operationResult.Errors);
         }
         var result = await _emailSettingsService.GetChannelStatusAsync(appId);
         return Ok(new ChannelStatus(
@@ -61,49 +61,39 @@ public class EmailsController(IAppService appService, IEmailSettingsService emai
         ));
     }
 
-    //[ClaimsAuthorize("Notification", "GetHistory")]
     [HttpGet("notifications")]
     public async Task<ActionResult> GetNotifications([FromRoute]int appId, [FromQuery]DateTime initDate, [FromQuery]DateTime endDate)
-    {
-        if (!await IsChannelActive(appId))
+    {        
+        var operationResult = await _emailNotificationService.GetNotificationsByDateAsync(appId, initDate, endDate);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        
-        var notifications = await _emailNotificationService.GetNotificationsByDateAsync(appId, initDate, endDate);
-        return Ok(notifications.Value.Select(n => new NotificationHistory(n.Id, n.SendDate)));
+        return Ok(operationResult.Value.Select(n => new NotificationHistory(n.Id, n.SendDate)));
     }
 
-    //[ClaimsAuthorize("Notification", "GetDetails")]
     [HttpGet("notifications/{notificationId:int}")]
     public async Task<ActionResult<EmailNotificationDetailDTO>> GetNotification(int appId, int notificationId)
     {
-        if (!await IsChannelActive(appId))
+        var operationResult = await _emailNotificationService.GetNotificationAsync(appId, notificationId);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
-        var notification = await _emailNotificationService.GetNotificationAsync(appId, notificationId);
-        return Ok(_mapper.Map<EmailNotificationDetailDTO>(notification.Value));
+        return Ok(_mapper.Map<EmailNotificationDetailDTO>(operationResult.Value));
     }
 
-    //[ClaimsAuthorize("Notification", "Create")]
     [HttpPost("notifications")]
     public async Task<ActionResult> CreateNotification([FromRoute]int appId, [FromBody] EmailNotificationDTO notificationDTO)
     {
-        if (!await IsChannelActive(appId))
+        var notification = _mapper.Map<EmailNotification>(notificationDTO);
+        
+        var operationResult = await _emailNotificationService.CreateNotificationAsync(appId, notification);
+        if (operationResult.IsFailed)
         {
-            return FormatResponse(Result.Fail("Channel is not active"));
+            return FormatBadRequestResponse(operationResult.Errors);
         }
 
-        var notification = _mapper.Map<EmailNotification>(notificationDTO);
-
-        await _emailNotificationService.CreateNotificationAsync(appId, notification);
         return CreatedAtAction(nameof(GetNotification), new { appId, notificationId = notification.Id }, new CreatedNotification(notification.Id));
-    }
-
-    private async Task<bool> IsChannelActive(int appId)
-    {
-        var result = await _emailSettingsService.GetChannelStatusAsync(appId);
-        return result.Value;
     }
 }
