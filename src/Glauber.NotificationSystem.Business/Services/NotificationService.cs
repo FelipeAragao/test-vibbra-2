@@ -21,7 +21,7 @@ public abstract class NotificationService<TNotification>(INotificationRepository
             return Result.Fail("No app was found with the provided Id");
         }
 
-        if (!IsChannelInactive())
+        if (IsChannelInactive())
         {
             return Result.Fail("Channel is not active");
         }
