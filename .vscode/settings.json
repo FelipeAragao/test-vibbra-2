@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/6c2ac89f-3851-4ae9-8f90-75bc6aaf3596/resourceGroups/vibbra-glcr_group/providers/Microsoft.Web/sites/vibbra-glcr",
+    "appService.deploySubpath": "."
+}
