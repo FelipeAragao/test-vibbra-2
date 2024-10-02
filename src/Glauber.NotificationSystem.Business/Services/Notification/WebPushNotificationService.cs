@@ -11,8 +11,8 @@ public class WebPushNotificationService(IWebpushNotificationRepository notificat
 {
     public override AbstractValidator<WebPushNotification> Validator => new WebpushNotificationValidator();
 
-    protected override bool IsChannelActive()
+    protected override bool IsChannelInactive()
     {
-        return App.ActiveChannels.WebPush;
+        return !App.ActiveChannels.WebPush;
     }
 }

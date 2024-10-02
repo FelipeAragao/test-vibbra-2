@@ -21,7 +21,7 @@ public abstract class NotificationService<TNotification>(INotificationRepository
             return Result.Fail("No app was found with the provided Id");
         }
 
-        if (IsChannelActive())
+        if (!IsChannelInactive())
         {
             return Result.Fail("Channel is not active");
         }
@@ -49,7 +49,7 @@ public abstract class NotificationService<TNotification>(INotificationRepository
             return Result.Fail("No app was found with the provided Id");
         }
 
-        if (IsChannelActive())
+        if (IsChannelInactive())
         {
             return Result.Fail("Channel is not active");
         }
@@ -74,7 +74,7 @@ public abstract class NotificationService<TNotification>(INotificationRepository
             return Result.Fail("No app was found with the provided Id");
         }
 
-        if (IsChannelActive())
+        if (IsChannelInactive())
         {
             return Result.Fail("Channel is not active");
         }
@@ -90,7 +90,7 @@ public abstract class NotificationService<TNotification>(INotificationRepository
 
     public void Dispose() => _notificationRepository.Dispose();
 
-    protected abstract bool IsChannelActive();
+    protected abstract bool IsChannelInactive();
 
     protected async Task<bool> AppDoesNotExist(int appId)
     {

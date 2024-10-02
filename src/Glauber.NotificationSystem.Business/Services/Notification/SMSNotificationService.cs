@@ -11,8 +11,8 @@ public class SMSNotificationService(ISMSNotificationRepository notificationRepos
 {
     public override AbstractValidator<SMSNotification> Validator => new SMSNotificationValidator();
 
-    protected override bool IsChannelActive()
+    protected override bool IsChannelInactive()
     {
-        return App.ActiveChannels.SMS;
+        return !App.ActiveChannels.SMS;
     }
 }

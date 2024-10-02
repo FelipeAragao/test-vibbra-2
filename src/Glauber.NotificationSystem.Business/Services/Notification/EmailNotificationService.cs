@@ -11,8 +11,8 @@ public class EmailNotificationService(IEmailNotificationRepository notificationR
 {
     public override AbstractValidator<EmailNotification> Validator => new EmailNotificationValidator();
 
-    protected override bool IsChannelActive()
+    protected override bool IsChannelInactive()
     {
-        return App.ActiveChannels.Email;
+        return !App.ActiveChannels.Email;
     }
 }
