@@ -20,6 +20,6 @@ public class NotificationRepository<TNotification>(NotificationSystemDbContext c
             .Where(n => 
                 n.AppId == appId && 
                 n.SendDate >= initDate && 
-                n.SendDate <= endDate)
+                n.SendDate <= endDate.AddHours(23).AddMinutes(59).AddSeconds(59))
             .ToListAsync();
 }
